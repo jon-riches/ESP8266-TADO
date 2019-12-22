@@ -7,7 +7,8 @@ https://circuits4you.com
 https://arduinojson.org/v6/api/json/deserializejson/
 https://shkspr.mobi/blog/2019/02/tado-api-guide-updated-for-2019/
 http://blog.scphillips.com/posts/2017/01/the-tado-api-v2/
-The Espressif / Arduino documentation
+The Espressif / Arduino documentation / examples
+https://github.com/esp8266/Arduino/tree/master/libraries 
 */
 
 #include <Arduino.h>
