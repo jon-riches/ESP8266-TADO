@@ -24,7 +24,7 @@ https://github.com/esp8266/Arduino/tree/master/libraries
 #include <Adafruit_Sensor.h>
 #include <DHT.h>
 #include <DHT_U.h>
-#define DHTPIN 4     // Digital pin connected to the DHT sensor 
+#define DHTPIN 4     // Digital pin connected to the DHT sensor - change as required
 #define DHTTYPE    DHT22     // DHT 22 (AM2302)
 DHT_Unified dht(DHTPIN, DHTTYPE);
 
@@ -55,7 +55,7 @@ const char *host = "auth.tado.com";
 const char *host2 = "my.tado.com";
 const int httpsPort = 443; //HTTPS= 443 and HTTP = 80
 
-//SHA1 finger print of certificate use web browser to view and copy
+//SHA1 fingerprint of certificate use web browser to view and copy
 const char fingerprint[]  PROGMEM = "A3 D1 64 E8 F4 FE 55 A9 05 32 D4 15 A3 15 32 22 3F 9A 8A 70";
 const char fingerprint2[] PROGMEM = "E3 F4 F5 81 49 0A 2D 49 BD 2C EE F6 E9 CA 9C B3 CE DE 39 8D";
 
