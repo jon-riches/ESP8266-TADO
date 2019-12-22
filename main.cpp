@@ -1,10 +1,11 @@
 /*
-Written by Jonathan Riches, inspired by many apologies for anyone's code portions I used and haven't credited!
+Written by Jonathan Riches, inspired by many. Apologies for anyone's code portions I used and haven't credited!
 This code isn't great, but it does work...
 
+References: -
 https://circuits4you.com 
 https://arduinojson.org/v6/api/json/deserializejson/
-
+The Espressif / Arduino documentation
 */
 
 #include <Arduino.h>
