@@ -301,6 +301,7 @@ DynamicJsonDocument doc(capacity);
   }
 
 // Fetch values
+// Most are not required, so commented out but left in for reference  
 //const char* tadoMode = doc["tadoMode"]; // "HOME"
 //bool geolocationOverride = doc["geolocationOverride"]; // false
 
