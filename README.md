@@ -6,3 +6,6 @@ Written for ESP12 and DHT22 using platformio / vscode
 This code is potentially buggy, and could lock you out of your Tado account
 
 It's probably a bad idea to use many of these...
+
+Inspired by https://community.tado.com/en-gb/discussion/2800/trvs-horribly-inaccurate-any-suggestions?
+
