@@ -452,7 +452,7 @@ txoffset = doc2["celsius"]; // -21.8
   Serial.println(sensorDataPoints_insideTemperature_celsius); 
   Serial.println("\r\n");
 
-toffset = actTemp + txoffset - sensorDataPoints_insideTemperature_celsius;
+toffset = actTemp - (sensorDataPoints_insideTemperature_celsius - txoffset);
   Serial.print("Offset calculated: ");
   Serial.println(toffset);
   Serial.print("Offset to submit: ");
