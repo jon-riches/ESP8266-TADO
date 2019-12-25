@@ -1,7 +1,6 @@
 /*
 Written by Jonathan Riches, inspired by many. Apologies for anyone's code portions I used and haven't credited!
 This code isn't great, but it does work...
-
 References: -
 https://circuits4you.com 
 https://arduinojson.org/v6/api/json/deserializejson/
@@ -16,38 +15,38 @@ https://github.com/esp8266/Arduino/tree/master/libraries
 #include <WiFiClientSecure.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266HTTPClient.h>
-#include <ArduinoJson.h>
+#include <ArduinoJson.h>        // https://arduinojson.org/
 
-// REQUIRES the following Arduino libraries:
 // - DHT Sensor Library: https://github.com/adafruit/DHT-sensor-library
 // - Adafruit Unified Sensor Lib: https://github.com/adafruit/Adafruit_Sensor
 #include <Adafruit_Sensor.h>
 #include <DHT.h>
 #include <DHT_U.h>
 #define DHTPIN 4     // Digital pin connected to the DHT sensor - change as required
-#define DHTTYPE    DHT22     // DHT 22 (AM2302)
+#define DHTTYPE    DHT22     // Sensor Type DHT 22 (AM2302)
 DHT_Unified dht(DHTPIN, DHTTYPE);
 
-
+//##################################################################################################################
 /* Set these to your desired credentials. */
-//ENTER YOUR WIFI SETTINGS
-const char *ssid = "your_ssid";
-const char *password = "your_pass";
 
-// Enter your Tado login
-const char *tlogin = "your_tado_email";
+// WiFi
+const char *ssid = "your-ssid";
+const char *password = "your_password";
+
+// Tado
+const char *tlogin = "your_tado_login";
 const char *tpassword = "your_tado_password";
-// Enter your home, zone and device 
 String thome = "00000"; // your_home_number"
 String tzone = "1"; // zone_id
 String tdevice = "VA1234567890"; //device ID to offset
 
+// End of credential / user setup block
+//##################################################################################################################
 
-//String tjson = "temp";
 float actTemp = 20; // Actual temperature of the room from ESP8266 Sensor
+float txoffset =0; //  Existing offset value returned by Tado
 float toffset = 0;  // Offset value to send to Tado
-char toffsetS[] = "T0000"; // Value to actually submit to Tado
-
+char toffsetS[] = "T0000"; // Converted value to actually submit to Tado
 
 //Web/Server address to read/write from
 
@@ -55,7 +54,8 @@ const char *host = "auth.tado.com";
 const char *host2 = "my.tado.com";
 const int httpsPort = 443; //HTTPS= 443 and HTTP = 80
 
-//SHA1 fingerprint of certificate use web browser to view and copy
+//SHA1 finger print of certificate use web browser to view and copy
+// Will change if Tado update their certificates
 const char fingerprint[]  PROGMEM = "A3 D1 64 E8 F4 FE 55 A9 05 32 D4 15 A3 15 32 22 3F 9A 8A 70";
 const char fingerprint2[] PROGMEM = "E3 F4 F5 81 49 0A 2D 49 BD 2C EE F6 E9 CA 9C B3 CE DE 39 8D";
 
@@ -235,7 +235,6 @@ actTemp = (event.temperature - 0.4);
     Serial.println("Connected to web");
   }
 
-
   
   Serial.print("requesting URL: ");
   Serial.println(host2);
@@ -301,7 +300,7 @@ DynamicJsonDocument doc(capacity);
   }
 
 // Fetch values
-// Most are not required, so commented out but left in for reference  
+// Most are not required, so commented out but left in for reference   
 //const char* tadoMode = doc["tadoMode"]; // "HOME"
 //bool geolocationOverride = doc["geolocationOverride"]; // false
 
@@ -351,11 +350,109 @@ float sensorDataPoints_insideTemperature_celsius = sensorDataPoints_insideTemper
   Serial.println(sensorDataPoints_insideTemperature_celsius);
 
 //###################################################################################################################
+// GET existing offset Value
+
+Serial.println(host2);
+
+  Serial.printf("Using fingerprint '%s'\n", fingerprint2);
+  httpsClient.setFingerprint(fingerprint2);
+  httpsClient.setTimeout(15000); // 15 Seconds
+  delay(1000);
+
+  Serial.print("HTTPS Connecting");
+  int rrrr = 0; //retry counter
+  while ((!httpsClient.connect(host2, httpsPort)) && (rrrr < 30))
+  {
+    delay(100);
+    Serial.print(".");
+    rrrr++;
+  }
+  if (rrrr == 30)
+  {
+    Serial.println("Connection failed");
+  }
+  else
+  {
+    Serial.println("Connected to web");
+  }
+
+  
+  Serial.print("requesting URL: ");
+  Serial.println(host2);
+
+
+  String httpText4 = (String("GET /api/v2/devices/" + tdevice + "/temperatureOffset HTTP/1.1") + "\r\n" +
+                     "Host: my.tado.com" + "\r\n" +
+                     "Authorization: Bearer " + Ttoken + "\r\n" +
+                     "Accept: */*" + "\r\n" +
+                     "Cache-Control: no-cache" + "\r\n" +
+                     "Host: my.tado.com" + "\r\n" +
+                     "Connection: close\r\n\r\n"
+                     );
+
+  httpsClient.print(httpText4);
+
+  Serial.println("HTTP request is: ");
+  Serial.println(httpText4);
+
+  Serial.println("request sent");
+
+  while (httpsClient.connected())
+  {
+    String line = httpsClient.readStringUntil('\n');
+    // Serial.println(line); //Print response
+    if (line == "\r")
+    {
+      Serial.println("headers received");
+      break;
+    }
+ 
+  }
+ 
+  Serial.println("reply was:");
+  Serial.println("==========");
+
+  String linez4;
+  String lineT4;
+
+    linez4 = httpsClient.readStringUntil('\n'); //Read Line by Line
+    lineT4 = httpsClient.readStringUntil('\n'); //Read Line by Line
+
+Serial.println("\r\n lineT4");
+Serial.println(lineT4); 
+Serial.println("\r\n");
+
+//################################################################################################################
+// JSON split to get Tado Offset
+
+const size_t capacity2 = JSON_OBJECT_SIZE(2) + 30;
+DynamicJsonDocument doc2(capacity2);
+
+//const char* json = "{\"celsius\":-21.8,\"fahrenheit\":-35.24}";
+DeserializationError error2 = deserializeJson(doc2, lineT4);
+
+  // Test if parsing succeeds.
+  if (error2) {
+    Serial.print(F("deserializeJson() failed: "));
+    Serial.println(error2.c_str());
+    return;
+  }
+
+txoffset = doc2["celsius"]; // -21.8
+
+
+//###################################################################################################################
 // Calculate offset value required
   Serial.print("Actual Temp: ");
   Serial.println(actTemp);
+  Serial.print("Current Offset: ");
+  Serial.println(txoffset); 
+  Serial.println("\r\n");
+  Serial.print("Tado reading inc. current offset: ");
+  Serial.println(sensorDataPoints_insideTemperature_celsius); 
+  Serial.println("\r\n");
 
-toffset = actTemp - sensorDataPoints_insideTemperature_celsius;
+toffset = actTemp + txoffset - sensorDataPoints_insideTemperature_celsius;
   Serial.print("Offset calculated: ");
   Serial.println(toffset);
   Serial.print("Offset to submit: ");
@@ -366,8 +463,7 @@ toffset = actTemp - sensorDataPoints_insideTemperature_celsius;
 //###################################################################################################################
 // PUT Offset to Tado
 
-Serial.println(host2);
-
+  Serial.println(host2);
   Serial.printf("Using fingerprint '%s'\n", fingerprint2);
   httpsClient.setFingerprint(fingerprint2);
   httpsClient.setTimeout(15000); // 15 Seconds
@@ -390,7 +486,6 @@ Serial.println(host2);
     Serial.println("Connected to web");
   }
 
- 
   Serial.print("requesting URL: ");
   Serial.println(host2);
 
