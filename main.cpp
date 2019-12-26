@@ -239,7 +239,7 @@ actTemp = (event.temperature - 0.4);
   Serial.print("requesting URL: ");
   Serial.println(host2);
 
-  String httpText2 = (String("GET /api/v2/homes/" + thome + "/zones/2/state HTTP/1.1") + "\r\n" +
+  String httpText2 = (String("GET /api/v2/homes/" + thome + "/zones/" + tzone + "/state HTTP/1.1") + "\r\n" +
                      "Host: my.tado.com" + "\r\n" +
                      "Authorization: Bearer " + Ttoken + "\r\n" +
                      "Accept: */*" + "\r\n" +
