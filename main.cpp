@@ -158,6 +158,11 @@ actTemp = (event.temperature - 0.4);
   Link = "/oauth/token";
   Serial.print("requesting URL: ");
   Serial.println(host);
+  
+  String httpBody =  (String("\r\n") +"client_id=tado-web-app&grant_type=password&scope=home.user&username=" + tlogin + "&password=" + tpassword + "&client_secret=wZaRN7rpjn3FoNyF5IFuxg9uMzYJcvOoQ8QWiIqS3hfk6gLhVlG57j5YNoZL2Rtc"
+  );
+  int httpBodyLength = httpBody.length()-2;
+
 
   String httpText = (String("POST ") + Link + " HTTP/1.1\r\n" +
                      "Host: " + host + "\r\n" +
@@ -165,10 +170,9 @@ actTemp = (event.temperature - 0.4);
                      "Accept: */*" + "\r\n" +
                      "Cache-Control: no-cache" + "\r\n" +
                      "Host: auth.tado.com" + "\r\n" +
-                     "Content-Length: 191" + "\r\n" +
+                     "Content-Length: " + httpBodyLength + "\r\n" +
                      "Connection: keep-alive" + "\r\n" +
-                     +"\r\n" +
-                     "client_id=tado-web-app&grant_type=password&scope=home.user&username=" + tlogin + "&password=" + tpassword + "&client_secret=wZaRN7rpjn3FoNyF5IFuxg9uMzYJcvOoQ8QWiIqS3hfk6gLhVlG57j5YNoZL2Rtc"
+                     httpBody +
                      +"Connection: close\r\n\r\n"
                      );
 
